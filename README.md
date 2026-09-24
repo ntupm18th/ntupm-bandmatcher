@@ -49,17 +49,19 @@ Supabase 只負責文字資料：開一次頁面只抓一次需要的欄位，�
 如果目前的 Supabase organization 這個月流量快用完了，可以另外開一個 organization
 或帳號給這個專案用。
 
-## 部署
+## 部署（GitHub Pages）
 
-```bash
-npm run build   # 產生 dist/
-```
+`.github/workflows/deploy.yml` 會在每次推到 `main` 時自動建置並部署。第一次設定：
 
-`dist/` 是純靜態網站，任何靜態主機都可以：
+1. Repo → **Settings → Pages** → Source 選 **GitHub Actions**。
+2. Repo → **Settings → Secrets and variables → Actions → Variables** 分頁，新增：
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_EVENT_NAME`（可不設）
+3. 到 **Actions** 分頁手動執行一次「Deploy to GitHub Pages」，或推一個新 commit。
 
-- **Cloudflare Pages / Vercel / Netlify**：連結 Git repo，Build command `npm run build`，
-  Output directory `dist`，並在後台的環境變數設定上面三個 `VITE_*` 值。
-- 網址使用 `#/quest/<id>` 形式，可以直接把某一首歌的連結丟到群組。
+網址會是 `https://<組織>.github.io/<repo 名稱>/`。沒設定 Supabase 變數時，網站會以示範模式上線。
+網址使用 `#/quest/<id>` 形式，可以直接把某一首歌的連結丟到群組。
 
 ## 專案結構
 
