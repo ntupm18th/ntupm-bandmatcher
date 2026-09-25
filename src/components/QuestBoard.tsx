@@ -121,20 +121,20 @@ function fitLines(lines: string[]): { lines: string[]; size: number } {
 
 /**
  * 依名字排成印章的樣子，名字照原樣刻（含標點）：
- * 中文 1 字置中放大；2～4 字直排兩行；5～6 字兩行各三字；7～9 字三行各三字；更長取前 9 字。
- * 直排的讀法是由上到下、由左到右。
+ * 中文橫排，先由左到右排滿一行，再往下換行：
+ * 1 字置中放大；2 字一行；3～4 字每行兩字；5～9 字每行三字；更長取前 9 字。
  * 英文或混合：最多兩行，字級依最長那行縮小；名字太長時只刻第一個字（名），再不夠就截斷加「…」。
  */
-function sealLayout(raw: string): { columns?: string[][]; lines?: string[]; size: number } {
+function sealLayout(raw: string): { rows?: string[][]; lines?: string[]; size: number } {
   const name = raw.trim()
   const chars = [...name]
   if (chars.length > 0 && chars.every((c) => CJK.test(c))) {
     const c = chars.slice(0, 9)
-    if (c.length === 1) return { columns: [c], size: 22 }
-    if (c.length === 2) return { columns: [c], size: 15 }
-    if (c.length <= 4) return { columns: [c.slice(0, 2), c.slice(2)], size: 13 }
-    if (c.length <= 6) return { columns: [c.slice(0, 3), c.slice(3)], size: 10 }
-    return { columns: [c.slice(0, 3), c.slice(3, 6), c.slice(6)], size: 8.5 }
+    if (c.length === 1) return { rows: [c], size: 22 }
+    if (c.length === 2) return { rows: [c], size: 15 }
+    if (c.length <= 4) return { rows: [c.slice(0, 2), c.slice(2)], size: 13 }
+    if (c.length <= 6) return { rows: [c.slice(0, 3), c.slice(3)], size: 10 }
+    return { rows: [c.slice(0, 3), c.slice(3, 6), c.slice(6)], size: 8.5 }
   }
 
   const words = name.split(/\s+/)
@@ -168,7 +168,7 @@ function sealLayout(raw: string): { columns?: string[][]; lines?: string[]; size
 
 export function Seal({ slot }: { slot: Slot }) {
   const name = slot.filled_by_name ?? ''
-  const { columns, lines, size } = sealLayout(name)
+  const { rows, lines, size } = sealLayout(name)
   return (
     <span
       className="seal"
@@ -176,10 +176,10 @@ export function Seal({ slot }: { slot: Slot }) {
       title={name}
       aria-label={name}
     >
-      {columns ? (
-        <span className="seal-cols" aria-hidden>
-          {columns.map((col, i) => (
-            <span key={i}>{col.join('')}</span>
+      {rows ? (
+        <span className="seal-rows" aria-hidden>
+          {rows.map((row, i) => (
+            <span key={i}>{row.join('')}</span>
           ))}
         </span>
       ) : (

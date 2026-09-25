@@ -490,17 +490,11 @@ textarea {
   mix-blend-mode: multiply;
 }
 
-/* 中文名：直排，由上到下、由左到右 */
-.seal-cols {
+/* 中文名：橫排，由左到右排滿再往下換行；最後一行較短時靠左 */
+.seal-rows {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-}
-
-.seal-cols > span {
-  writing-mode: vertical-rl;
-  letter-spacing: 0.05em;
 }
 
 /* 英文名：最多兩行 */
