@@ -59,9 +59,13 @@ export function QuestDetail(props: Props) {
           <>
             <dt>參考</dt>
             <dd>
-              <a href={song.ref_url} target="_blank" rel="noreferrer">
-                {song.ref_url}
-              </a>
+              {/^https?:\/\//i.test(song.ref_url) ? (
+                <a href={song.ref_url} target="_blank" rel="noreferrer">
+                  {song.ref_url}
+                </a>
+              ) : (
+                song.ref_url
+              )}
             </dd>
           </>
         )}
