@@ -4,6 +4,7 @@ import { MusicianForm, SongForm } from './components/Forms'
 import { QuestBoard } from './components/QuestBoard'
 import { QuestDetail } from './components/QuestDetail'
 import { MusicianDetail, Roster } from './components/Roster'
+import { Rules } from './components/Rules'
 import { Modal } from './components/ui'
 import type { Musician, Song } from './types'
 
@@ -14,6 +15,7 @@ type Route =
   | { page: 'roster' }
   | { page: 'new-quest' }
   | { page: 'join' }
+  | { page: 'rules' }
   | { page: 'quest'; id: string; edit?: boolean }
   | { page: 'musician'; id: string; edit?: boolean }
 
@@ -22,6 +24,7 @@ function parseHash(): Route {
   if (a === 'roster') return { page: 'roster' }
   if (a === 'new-quest') return { page: 'new-quest' }
   if (a === 'join') return { page: 'join' }
+  if (a === 'rules') return { page: 'rules' }
   if (a === 'quest' && id) return { page: 'quest', id, edit: edit === 'edit' }
   if (a === 'musician' && id) return { page: 'musician', id, edit: edit === 'edit' }
   return { page: 'quests' }
@@ -34,6 +37,7 @@ function go(path: string) {
 // ───────── 本分頁記住已解鎖的密碼，關掉分頁就忘記 ─────────
 
 const KEYS = 'bandmatcher-keys'
+const RULES_SEEN = 'bandmatcher-rules-seen-v1'
 function loadKeys(): Record<string, string> {
   try {
     return JSON.parse(sessionStorage.getItem(KEYS) || '{}')
@@ -50,6 +54,14 @@ export default function App() {
   const [loadError, setLoadError] = useState('')
   const [keys, setKeys] = useState<Record<string, string>>(loadKeys)
   const [toastMsg, setToastMsg] = useState('')
+  // 第一次進站先看規則；看過就記在這個瀏覽器
+  const [firstVisit, setFirstVisit] = useState(() => {
+    try {
+      return localStorage.getItem(RULES_SEEN) !== '1'
+    } catch {
+      return true
+    }
+  })
   const lastLoad = useRef(0)
   const toastTimer = useRef<number>(undefined)
   const baseTab = useRef<'quests' | 'roster'>('quests')
@@ -101,6 +113,15 @@ export default function App() {
   if (route.page === 'quests' || route.page === 'quest' || route.page === 'new-quest') baseTab.current = 'quests'
   const tab = baseTab.current
   const closeModal = () => go(tab === 'roster' ? '/roster' : '/')
+  const closeRules = () => {
+    try {
+      localStorage.setItem(RULES_SEEN, '1')
+    } catch {
+      /* 存不了就下次再顯示 */
+    }
+    if (firstVisit) setFirstVisit(false)
+    if (route.page === 'rules') closeModal()
+  }
 
   const song = route.page === 'quest' ? songs.find((s) => s.id === route.id) : undefined
   const musician = route.page === 'musician' ? musicians.find((m) => m.id === route.id) : undefined
@@ -111,7 +132,7 @@ export default function App() {
         <div className="masthead">
           <h1>
             <span>流唱之夜</span>
-            <span>樂手懸賞榜</span>
+            <span>樂手懸賞區</span>
           </h1>
           {EVENT_NAME && <p className="event">{EVENT_NAME}</p>}
         </div>
@@ -121,6 +142,9 @@ export default function App() {
           </a>
           <a className="btn btn-line" href="#/join">
             登記樂手資料
+          </a>
+          <a className="btn btn-line" href="#/rules">
+            報名規則
           </a>
         </div>
       </header>
@@ -157,7 +181,13 @@ export default function App() {
         )}
       </main>
 
-      {route.page === 'new-quest' && (
+      {(firstVisit || route.page === 'rules') && (
+        <Modal onClose={closeRules} wide>
+          <Rules onClose={closeRules} />
+        </Modal>
+      )}
+
+      {!firstVisit && route.page === 'new-quest' && (
         <Modal onClose={closeModal} wide>
           <SongForm
             onDone={async (id, pw) => {
@@ -170,7 +200,7 @@ export default function App() {
         </Modal>
       )}
 
-      {route.page === 'join' && (
+      {!firstVisit && route.page === 'join' && (
         <Modal onClose={closeModal} wide>
           <MusicianForm
             onDone={async (id, pw) => {
@@ -183,7 +213,7 @@ export default function App() {
         </Modal>
       )}
 
-      {route.page === 'quest' && loaded && (
+      {!firstVisit && route.page === 'quest' && loaded && (
         <Modal onClose={closeModal} wide>
           {!song ? (
             <p>找不到這首歌，可能已經撤下了。</p>
@@ -213,7 +243,7 @@ export default function App() {
         </Modal>
       )}
 
-      {route.page === 'musician' && loaded && (
+      {!firstVisit && route.page === 'musician' && loaded && (
         <Modal onClose={closeModal}>
           {!musician ? (
             <p>找不到這位樂手，可能已經刪掉資料了。</p>
