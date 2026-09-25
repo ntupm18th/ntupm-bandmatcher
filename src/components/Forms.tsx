@@ -134,7 +134,7 @@ export function SongForm({ song, password, onDone }: { song?: Song; password?: s
       {error && <p className="error">{error}</p>}
       <div className="form-actions">
         <button className="btn" disabled={busy}>
-          {busy ? '送出中…' : song ? '儲存' : '貼上懸賞榜'}
+          {busy ? '送出中…' : song ? '儲存' : '貼上懸賞區'}
         </button>
       </div>
     </form>

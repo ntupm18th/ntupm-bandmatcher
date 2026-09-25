@@ -151,7 +151,7 @@ export default function App() {
 
       <nav className="tabs">
         <a href="#/" className={tab === 'quests' ? 'on' : ''}>
-          懸賞榜<span>{songs.length}</span>
+          懸賞區<span>{songs.length}</span>
         </a>
         <a href="#/roster" className={tab === 'roster' ? 'on' : ''}>
           樂手名冊<span>{musicians.length}</span>
@@ -193,7 +193,7 @@ export default function App() {
             onDone={async (id, pw) => {
               await refresh()
               if (pw) unlock(id, pw)
-              toast('已貼上懸賞榜')
+              toast('已貼上懸賞區')
               go(`/quest/${id}`)
             }}
           />

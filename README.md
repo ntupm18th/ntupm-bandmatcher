@@ -1,6 +1,6 @@
 # 流唱之夜樂手懸賞區
 
-表演活動的樂手媒合工具，做成「任務懸賞榜」的樣子：
+表演活動的樂手媒合工具，做成「任務懸賞區」的樣子：
 
 - **主唱**按「徵樂手」貼一首歌，列出缺的樂手（電吉他、貝斯、鼓…），每個位置是懸賞單上的一格集章格。
 - **樂手**在名冊登記自己會的樂器、自我介紹、聯絡方式，看到缺人的位置按「我來」報名。
@@ -69,7 +69,7 @@ Supabase 只負責文字資料：開一次頁面只抓一次需要的欄位，�
 supabase/schema.sql         資料表、權限、所有寫入用的 RPC 函式
 src/api.ts                  Supabase 與示範模式兩種實作
 src/App.tsx                 路由、資料載入、彈窗
-src/components/QuestBoard   懸賞榜與懸賞單
+src/components/QuestBoard   懸賞區與懸賞單
 src/components/QuestDetail  歌曲內容、報名、主唱管理
 src/components/Roster       樂手名冊與個人資料
 src/components/Forms        徵樂手、登記樂手的表單
