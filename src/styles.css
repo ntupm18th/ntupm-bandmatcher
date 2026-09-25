@@ -490,11 +490,11 @@ textarea {
   mix-blend-mode: multiply;
 }
 
-/* 中文名：直排，由右至左 */
+/* 中文名：直排，由上到下、由左到右 */
 .seal-cols {
   display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   gap: 2px;
 }
 

@@ -120,22 +120,21 @@ function fitLines(lines: string[]): { lines: string[]; size: number } {
 }
 
 /**
- * 依名字排成印章的樣子（名字會先整理過，見函式開頭）：
- * 中文 1 字置中放大；2～4 字直排兩行、由右至左（像真的名章）；5～6 字排成兩行各三字；更長取前 6 字。
+ * 依名字排成印章的樣子，名字照原樣刻（含標點）：
+ * 中文 1 字置中放大；2～4 字直排兩行；5～6 字兩行各三字；7～9 字三行各三字；更長取前 9 字。
+ * 直排的讀法是由上到下、由左到右。
  * 英文或混合：最多兩行，字級依最長那行縮小；名字太長時只刻第一個字（名），再不夠就截斷加「…」。
  */
 function sealLayout(raw: string): { columns?: string[][]; lines?: string[]; size: number } {
-  // 全形英數轉半形（ＡＢＣ → ABC）；有中文的名字把標點、空白拿掉（範例：大茗 → 範例大茗），印章上不刻標點
-  const normalized = raw.normalize('NFKC').trim()
-  const stripped = CJK.test(normalized) ? normalized.replace(/[\s\p{P}\p{S}]/gu, '') : normalized
-  const name = stripped || normalized
+  const name = raw.trim()
   const chars = [...name]
   if (chars.length > 0 && chars.every((c) => CJK.test(c))) {
-    const c = chars.slice(0, 6)
+    const c = chars.slice(0, 9)
     if (c.length === 1) return { columns: [c], size: 22 }
     if (c.length === 2) return { columns: [c], size: 15 }
     if (c.length <= 4) return { columns: [c.slice(0, 2), c.slice(2)], size: 13 }
-    return { columns: [c.slice(0, 3), c.slice(3)], size: 10 }
+    if (c.length <= 6) return { columns: [c.slice(0, 3), c.slice(3)], size: 10 }
+    return { columns: [c.slice(0, 3), c.slice(3, 6), c.slice(6)], size: 8.5 }
   }
 
   const words = name.split(/\s+/)
