@@ -96,7 +96,8 @@ export function QuestBoard({ songs, onOpen }: { songs: Song[]; onOpen: (id: stri
   )
 }
 
-const CJK = /[㐀-鿿豈-﫿぀-ヿ가-힯]/
+// 全形字：中日韓文字、全形標點（：，。「」）與全形英數，寬度都是 1 個字
+const CJK = /[\u2e80-\u9fff\uf900-\ufaff\uac00-\ud7af\ufe30-\ufe4f\uff00-\uffef]/
 const LATIN_EM = 0.55 // 英文字平均字寬約 0.55em
 const MIN_SIZE = 8
 
@@ -111,27 +112,30 @@ function splitWord(word: string): string[] {
 }
 
 /** 圓形印章裡能放的寬度：兩行字的四個角比較靠近圓周，所以要窄一點 */
-const innerWidth = (lines: number) => (lines === 1 ? 36 : 32)
+const innerWidth = (lines: number) => (lines === 1 ? 34 : 29)
 
 function fitLines(lines: string[]): { lines: string[]; size: number } {
-  const size = Math.min(13, innerWidth(lines.length) / Math.max(...lines.map(textWidth)))
+  const size = Math.min(12, innerWidth(lines.length) / Math.max(...lines.map(textWidth)))
   return { lines, size }
 }
 
 /**
- * 依名字排成印章的樣子：
+ * 依名字排成印章的樣子（名字會先整理過，見函式開頭）：
  * 中文 1 字置中放大；2～4 字直排兩行、由右至左（像真的名章）；5～6 字排成兩行各三字；更長取前 6 字。
  * 英文或混合：最多兩行，字級依最長那行縮小；名字太長時只刻第一個字（名），再不夠就截斷加「…」。
  */
 function sealLayout(raw: string): { columns?: string[][]; lines?: string[]; size: number } {
-  const name = raw.trim()
+  // 全形英數轉半形（ＡＢＣ → ABC）；有中文的名字把標點、空白拿掉（範例：大茗 → 範例大茗），印章上不刻標點
+  const normalized = raw.normalize('NFKC').trim()
+  const stripped = CJK.test(normalized) ? normalized.replace(/[\s\p{P}\p{S}]/gu, '') : normalized
+  const name = stripped || normalized
   const chars = [...name]
   if (chars.length > 0 && chars.every((c) => CJK.test(c))) {
     const c = chars.slice(0, 6)
     if (c.length === 1) return { columns: [c], size: 22 }
     if (c.length === 2) return { columns: [c], size: 15 }
-    if (c.length <= 4) return { columns: [c.slice(0, 2), c.slice(2)], size: 14 }
-    return { columns: [c.slice(0, 3), c.slice(3)], size: 11 }
+    if (c.length <= 4) return { columns: [c.slice(0, 2), c.slice(2)], size: 13 }
+    return { columns: [c.slice(0, 3), c.slice(3)], size: 10 }
   }
 
   const words = name.split(/\s+/)
