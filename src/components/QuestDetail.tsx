@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { api, errorText } from '../api'
 import type { Application, ApplyInput, Musician, Slot, Song } from '../types'
-import { isComplete, Seal } from './QuestBoard'
+import { isComplete, Seal, slotLabels } from './QuestBoard'
 import { Contact, PasswordGate, relativeTime } from './ui'
 
 interface Props {
@@ -24,6 +24,7 @@ export function QuestDetail(props: Props) {
   const managing = password !== undefined
   const done = isComplete(song)
   const filled = song.slots.filter((s) => s.filled_at).length
+  const labels = slotLabels(song.slots)
 
   /** 執行需要密碼的動作，完成後重新載入資料 */
   async function run(action: () => Promise<void>, success?: string): Promise<boolean> {
@@ -77,6 +78,7 @@ export function QuestDetail(props: Props) {
           <SlotRow
             key={slot.id}
             slot={slot}
+            label={labels[slot.id]}
             applications={song.applications.filter((a) => a.slot_id === slot.id)}
             musicians={musicians}
             password={password}
@@ -142,6 +144,7 @@ export function QuestDetail(props: Props) {
 
 function SlotRow({
   slot,
+  label,
   applications,
   musicians,
   password,
@@ -150,6 +153,7 @@ function SlotRow({
   onOpenMusician,
 }: {
   slot: Slot
+  label: string
   applications: Application[]
   musicians: Musician[]
   password: string | undefined
@@ -167,7 +171,7 @@ function SlotRow({
     <li className={`slot-row ${slot.filled_at ? 'filled' : ''}`}>
       <div className="slot-main">
         <div className="stamp-box">
-          <span className="stamp-label">{slot.instrument}</span>
+          <span className="stamp-label">{label}</span>
           {slot.filled_at && <Seal slot={slot} />}
         </div>
 
@@ -207,8 +211,8 @@ function SlotRow({
               <button
                 className="btn btn-small btn-danger"
                 onClick={() =>
-                  confirm(`刪掉「${slot.instrument}」這個位置？`) &&
-                  run(() => api.removeSlot(slot.id, password), `已刪掉「${slot.instrument}」`)
+                  confirm(`刪掉「${label}」這個位置？`) &&
+                  run(() => api.removeSlot(slot.id, password), `已刪掉「${label}」`)
                 }
               >
                 刪掉位置
@@ -219,6 +223,7 @@ function SlotRow({
           {applying && (
             <ApplyForm
               slot={slot}
+              label={label}
               musicians={musicians}
               onSubmit={async (input) => {
                 if (await run(() => api.apply(slot.id, input), '已報名，主唱確認後會蓋章')) setApplying(false)
@@ -280,7 +285,17 @@ function SlotRow({
   )
 }
 
-function ApplyForm({ slot, musicians, onSubmit }: { slot: Slot; musicians: Musician[]; onSubmit: (input: ApplyInput) => Promise<void> }) {
+function ApplyForm({
+  slot,
+  label,
+  musicians,
+  onSubmit,
+}: {
+  slot: Slot
+  label: string
+  musicians: Musician[]
+  onSubmit: (input: ApplyInput) => Promise<void>
+}) {
   const [musicianId, setMusicianId] = useState('')
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
@@ -327,7 +342,7 @@ function ApplyForm({ slot, musicians, onSubmit }: { slot: Slot; musicians: Music
       </div>
       <input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={300} placeholder="想跟主唱說什麼（可不填）" aria-label="留言" />
       <button className="btn" disabled={busy}>
-        {busy ? '送出中…' : `報名${slot.instrument}`}
+        {busy ? '送出中…' : `報名${label}`}
       </button>
     </form>
   )

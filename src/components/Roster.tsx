@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { api, errorText } from '../api'
 import type { Musician, Song } from '../types'
 import { Contact, InstrumentTag, PasswordGate } from './ui'
-import { jitter } from './QuestBoard'
+import { jitter, slotLabels } from './QuestBoard'
 
 /** 某位樂手已被錄取的歌曲 */
 function questsOf(musician: Musician, songs: Song[]) {
@@ -115,7 +115,7 @@ export function MusicianDetail({
             <button className="link-btn" onClick={() => onOpenSong(song.id)}>
               {song.title}
             </button>{' '}
-            <span className="muted">{slot.instrument}</span> <span className="status status-ok">已確認</span>
+            <span className="muted">{slotLabels(song.slots)[slot.id]}</span> <span className="status status-ok">已確認</span>
           </li>
         ))}
         {applied.map(({ song, a }) => (
@@ -123,7 +123,7 @@ export function MusicianDetail({
             <button className="link-btn" onClick={() => onOpenSong(song.id)}>
               {song.title}
             </button>{' '}
-            <span className="muted">{song.slots.find((s) => s.id === a.slot_id)?.instrument}</span>{' '}
+            <span className="muted">{slotLabels(song.slots)[a.slot_id]}</span>{' '}
             <span className="status">等確認</span>
           </li>
         ))}

@@ -13,6 +13,25 @@ export function jitter(id: string, range: number) {
   return ((Math.abs(h) % 1000) / 1000 - 0.5) * 2 * range
 }
 
+/** 同一首歌有重複的樂器時加上編號：電吉他1、電吉他2；只有一個就不加 */
+export function numberDuplicates(names: string[]): string[] {
+  const total = new Map<string, number>()
+  for (const n of names) total.set(n, (total.get(n) ?? 0) + 1)
+  const seen = new Map<string, number>()
+  return names.map((n) => {
+    if (total.get(n)! < 2) return n
+    const i = (seen.get(n) ?? 0) + 1
+    seen.set(n, i)
+    return `${n}${i}`
+  })
+}
+
+/** 每個位置顯示用的名稱（slot id → 名稱），slots 需依 position 排好 */
+export function slotLabels(slots: Slot[]): Record<string, string> {
+  const labels = numberDuplicates(slots.map((s) => s.instrument))
+  return Object.fromEntries(slots.map((s, i) => [s.id, labels[i]]))
+}
+
 type Filter = 'open' | 'done' | 'all'
 
 export function QuestBoard({ songs, onOpen }: { songs: Song[]; onOpen: (id: string) => void }) {
@@ -175,6 +194,7 @@ function QuestCard({ song, onOpen }: { song: Song; onOpen: () => void }) {
   const done = isComplete(song)
   const missing = song.slots.filter((s) => !s.filled_at).length
   const pending = song.applications.filter((a) => a.status === 'pending').length
+  const labels = slotLabels(song.slots)
 
   return (
     <button
@@ -196,7 +216,7 @@ function QuestCard({ song, onOpen }: { song: Song; onOpen: () => void }) {
       <ol className="stamp-card">
         {song.slots.map((slot) => (
           <li key={slot.id} className={slot.filled_at ? 'filled' : ''}>
-            <span className="stamp-label">{slot.instrument}</span>
+            <span className="stamp-label">{labels[slot.id]}</span>
             {slot.filled_at && <Seal slot={slot} />}
           </li>
         ))}

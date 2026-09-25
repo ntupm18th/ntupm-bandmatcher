@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api, errorText } from '../api'
 import { COMMON_INSTRUMENTS } from '../instruments'
 import type { Musician, MusicianInput, Song, SongInput } from '../types'
+import { numberDuplicates } from './QuestBoard'
 import { Field } from './ui'
 
 function CustomInstrumentInput({ onAdd }: { onAdd: (name: string) => void }) {
@@ -112,9 +113,9 @@ export function SongForm({ song, password, onDone }: { song?: Song; password?: s
             <CustomInstrumentInput onAdd={(name) => slots.length < 12 && setSlots([...slots, name])} />
             <div className="slot-preview">
               {slots.length === 0 && <span className="muted">還沒選</span>}
-              {slots.map((name, i) => (
-                <button type="button" key={i} className="chip chip-on" onClick={() => setSlots(slots.filter((_, j) => j !== i))} aria-label={`移除${name}`}>
-                  {name} ✕
+              {numberDuplicates(slots).map((label, i) => (
+                <button type="button" key={i} className="chip chip-on" onClick={() => setSlots(slots.filter((_, j) => j !== i))} aria-label={`移除${label}`}>
+                  {label} ✕
                 </button>
               ))}
             </div>
